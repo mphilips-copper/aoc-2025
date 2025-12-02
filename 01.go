@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"strings"
 	"strconv"
+	"strings"
 	"unicode/utf8"
 )
 
@@ -19,7 +19,7 @@ func main() {
 	}
 
 	arrow := l.Front()
-	arrow = turnRight(l, arrow, 50)
+	arrow, _ = turnRight(l, arrow, 50)
 	numZeroes := 0
 	newZeroes := 0
 
@@ -48,10 +48,8 @@ func main() {
 				panic(err)
 			}
 
-			arrow = turnRight(l, arrow, i)
-			if arrow.Value == 0 {
-				numZeroes++
-			}
+			arrow, newZeroes = turnRight(l, arrow, i)
+			numZeroes = numZeroes + newZeroes
 
 			fmt.Println("dial is:", arrow.Value)
 			fmt.Println("new zeroes:", newZeroes)
@@ -67,10 +65,8 @@ func main() {
 				panic(err)
 			}
 
-			arrow = turnLeft(l, arrow, i)
-			if arrow.Value == 0 {
-				numZeroes++
-			}
+			arrow, newZeroes = turnLeft(l, arrow, i)
+			numZeroes = numZeroes + newZeroes
 
 			fmt.Println("dial is:", arrow.Value)
 			fmt.Println("new zeroes:", newZeroes)
@@ -86,28 +82,37 @@ func main() {
 	fmt.Println("num zeroes:", numZeroes)
 }
 
-func turnRight(l *list.List, e *list.Element, clicks int) (*list.Element) {
+func turnRight(l *list.List, e *list.Element, clicks int) (*list.Element, int) {
+	numZeroes := 0
+
 	for _ = range clicks {
 		if e.Next() != nil {
 			e = e.Next()
 		} else {
 			e = l.Front()
+
+			numZeroes++
 		}
 	}
 
-	return e
+	return e, numZeroes
 }
 
-func turnLeft(l *list.List, e *list.Element, clicks int) (*list.Element) {
+func turnLeft(l *list.List, e *list.Element, clicks int) (*list.Element, int) {
+	numZeroes := 0
+
 	for _ = range clicks {
 		if e.Prev() != nil {
 			e = e.Prev()
+			if e.Value == 0 {
+				numZeroes++
+			}
 		} else {
 			e = l.Back()
 		}
 	}
 
-	return e
+	return e, numZeroes
 }
 
 // Source - https://stackoverflow.com/a/48801414
