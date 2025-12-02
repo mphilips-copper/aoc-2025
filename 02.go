@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"fmt"
 	"log"
 	"os"
@@ -17,6 +18,8 @@ func main() {
 	stringRanges := strings.Split(string(input), ",")
 	sumInvalidIds := 0
 
+	uniqueIds := make(map[int]bool)
+
 	for _, stringRange := range stringRanges {
 		stringIds := strings.Split(stringRange, "-")
 		// let's assume input is perfect and there will be exactly 2 ids here
@@ -30,41 +33,60 @@ func main() {
 
 		for key, value := range ids {
 			if containsRepeatedSequence(value) {
-				fmt.Println("invalid key:", key)
-				sumInvalidIds = sumInvalidIds + key
+				if uniqueIds[key] == false {
+					uniqueIds[key] = true
+					sumInvalidIds = sumInvalidIds + key
+				}
 			}
 		}
-
-		fmt.Println("\n")
 	}
 
 	fmt.Println(sumInvalidIds)
 }
 
 func containsRepeatedSequence(input string) bool {
-	// fmt.Println("input:", input)
+	for subLength := range len(input) - 1 {
+		if len(input)%(subLength+1) != 0 {
+			continue
+		}
 
-	// digit frequency cases
-	// only one digit - TRUE
-	// two+ digits - TRUE if all counts >=2 and all counts ==
+		stringChunks := SplitSubN(input, subLength+1)
 
-	digitFrequency := make(map[string]int)
-	for _, char := range input {
-		digitChar := string(char)
-		digitFrequency[digitChar]++
+		if allChunksEqual(stringChunks) {
+			return true
+		}
 	}
 
-	// fmt.Println(digitFrequency)
+	return false
+}
 
-	if len(digitFrequency) == 1 {
-		return true
+// Source - https://stackoverflow.com/a/39347212
+// Posted by mozey
+// Retrieved 2025-12-02, License - CC BY-SA 3.0
+func SplitSubN(s string, n int) []string {
+	sub := ""
+	subs := []string{}
+
+	runes := bytes.Runes([]byte(s))
+	l := len(runes)
+	for i, r := range runes {
+		sub = sub + string(r)
+		if (i+1)%n == 0 {
+			subs = append(subs, sub)
+			sub = ""
+		} else if (i + 1) == l {
+			subs = append(subs, sub)
+		}
 	}
 
-	firstCount := digitFrequency[string(input[0])]
-	// fmt.Println("first char:", string(input[0]), "first count:", firstCount)
+	return subs
+}
 
-	for _, value := range digitFrequency {
-		if value < 2 || value != firstCount {
+func allChunksEqual(chunks []string) bool {
+	comparisonChunk := chunks[0]
+
+	for i := 1; i < len(chunks); i++ {
+		if chunks[i] != comparisonChunk {
 			return false
 		}
 	}
