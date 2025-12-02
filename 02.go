@@ -18,7 +18,6 @@ func main() {
 	sumInvalidIds := 0
 
 	for _, stringRange := range stringRanges {
-
 		stringIds := strings.Split(stringRange, "-")
 		// let's assume input is perfect and there will be exactly 2 ids here
 		start, _ := strconv.Atoi(stringIds[0])
@@ -30,22 +29,45 @@ func main() {
 		}
 
 		for key, value := range ids {
-			// ids with an odd number of digits are valid for sure
-			if len(value) % 2 != 0 {
-				continue
-			}
-
-			// from google ai overview
-			mid := len(value) / 2
-			firstHalf := value[:mid]
-			secondHalf := value[mid:]
-			//
-
-			if firstHalf == secondHalf {
+			if containsRepeatedSequence(value) {
+				fmt.Println("invalid key:", key)
 				sumInvalidIds = sumInvalidIds + key
 			}
 		}
+
+		fmt.Println("\n")
 	}
 
 	fmt.Println(sumInvalidIds)
+}
+
+func containsRepeatedSequence(input string) bool {
+	// fmt.Println("input:", input)
+
+	// digit frequency cases
+	// only one digit - TRUE
+	// two+ digits - TRUE if all counts >=2 and all counts ==
+
+	digitFrequency := make(map[string]int)
+	for _, char := range input {
+		digitChar := string(char)
+		digitFrequency[digitChar]++
+	}
+
+	// fmt.Println(digitFrequency)
+
+	if len(digitFrequency) == 1 {
+		return true
+	}
+
+	firstCount := digitFrequency[string(input[0])]
+	// fmt.Println("first char:", string(input[0]), "first count:", firstCount)
+
+	for _, value := range digitFrequency {
+		if value < 2 || value != firstCount {
+			return false
+		}
+	}
+
+	return true
 }
