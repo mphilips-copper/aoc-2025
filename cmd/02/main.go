@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	input, err := os.ReadFile("02.txt")
+	input, err := os.ReadFile("input.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -93,3 +93,4 @@ func allChunksEqual(chunks []string) bool {
 
 	return true
 }
+

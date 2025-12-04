@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	input, err := os.ReadFile("03.txt")
+	input, err := os.ReadFile("input.txt")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -68,3 +68,4 @@ func findLargestDigitAndIndex(startAt int, batteryBank string) (int, int) {
 
 	return largestDigit, startAt + index
 }
+
