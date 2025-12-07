@@ -8,7 +8,7 @@ import (
 )
 
 type gridSlot struct {
-	empty  bool
+	state  rune
 	xCoord int
 	yCoord int
 }
@@ -18,6 +18,11 @@ type grid struct {
 	height    int
 	gridSlots [][]gridSlot
 }
+
+const (
+	EMPTY = '.'
+	PAPER = '@'
+)
 
 func main() {
 	input, err := os.ReadFile("cmd/04/input.txt")
@@ -39,25 +44,39 @@ func main() {
 			paperGrid.gridSlots[i][j] = gridSlot{
 				xCoord: j,
 				yCoord: i,
-				empty:  char == 46, // ASCII '.'
+				state:  char,
 			}
 		}
 	}
 
-	accessiblePaper := 0
-	for i := 0; i < paperGrid.height; i++ {
-		for j := 0; j < paperGrid.width; j++ {
-			if isGridSlotPaperAndForkliftable(paperGrid, paperGrid.gridSlots[i][j]) {
-				accessiblePaper++
-			}
+	totalSlotsCleared := 0
+	numSlotsCleared := 1 // start as some non-zero value
+	for numSlotsCleared > 0 {
+		paperAndForkliftableGridSlots := paperAndForkliftableGridSlots(paperGrid)
+
+		numSlotsCleared = len(paperAndForkliftableGridSlots)
+		totalSlotsCleared += numSlotsCleared
+
+		for _, slot := range paperAndForkliftableGridSlots {
+			paperGrid.gridSlots[slot.yCoord][slot.xCoord].state = EMPTY
 		}
 	}
 
-	fmt.Println(accessiblePaper)
+	fmt.Println(totalSlotsCleared)
 }
 
-func isGridSlotPaperAndForkliftable(paperGrid grid, slot gridSlot) bool {
-	return !slot.empty && numEmptyNeighbors(paperGrid, slot) > 4
+func paperAndForkliftableGridSlots(paperGrid grid) []gridSlot {
+	paperAndForkliftableGridSlots := []gridSlot{}
+
+	for i := 0; i < paperGrid.height; i++ {
+		for j := 0; j < paperGrid.width; j++ {
+			if paperGrid.gridSlots[i][j].state == PAPER && numEmptyNeighbors(paperGrid, paperGrid.gridSlots[i][j]) > 4 {
+				paperAndForkliftableGridSlots = append(paperAndForkliftableGridSlots, paperGrid.gridSlots[i][j])
+			}
+		}
+	}
+
+	return paperAndForkliftableGridSlots
 }
 
 func numEmptyNeighbors(paperGrid grid, slot gridSlot) int {
@@ -67,7 +86,7 @@ func numEmptyNeighbors(paperGrid grid, slot gridSlot) int {
 	numEmptyNeighbors := 8 - len(slotNeighbors)
 
 	for _, neighbor := range slotNeighbors {
-		if neighbor.empty {
+		if neighbor.state == EMPTY {
 			numEmptyNeighbors++
 		}
 	}
