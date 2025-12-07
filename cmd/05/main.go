@@ -4,9 +4,15 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 )
+
+type event struct {
+	id       int
+	coverage int
+}
 
 func main() {
 	input, err := os.ReadFile("cmd/05/input.txt")
@@ -16,19 +22,52 @@ func main() {
 
 	lines := strings.Split(string(input), "\n")
 
-	freshIDRanges, ingredientIDs := parseInput(lines)
+	freshIDRanges, _ := parseInput(lines)
 
-	numFreshIngredients := 0
-	for _, ingredientID := range ingredientIDs {
-		for _, freshIDRange := range freshIDRanges {
-			if freshIDRange[0] <= ingredientID && freshIDRange[1] >= ingredientID {
-				numFreshIngredients++
-				break
-			}
+	// An algorithm to build a list of covered ranges from a given set of
+	// intervals, effectively merging overlapping or adjacent intervals into a
+	// consolidated list of non-overlapping covered ranges, can be implemented
+	// using a sweep-line approach.
+
+	events := []event{}
+
+	for _, freshIDRange := range freshIDRanges {
+		events = append(events, event{
+			id:       freshIDRange[0],
+			coverage: 1,
+		})
+		events = append(events, event{
+			id:       freshIDRange[1],
+			coverage: -1,
+		})
+	}
+
+	sort.Slice(events, func(i, j int) bool {
+		if events[i].id == events[j].id {
+			return events[i].coverage > events[j].coverage
+		}
+		return events[i].id < events[j].id
+	})
+
+	coverageCount := 0
+	currentStart := 0
+	coveredRanges := [][]int{}
+
+	for _, event := range events {
+		if coverageCount == 0 && event.coverage == 1 {
+			currentStart = event.id
+		}
+		coverageCount += event.coverage
+		if coverageCount == 0 && event.coverage == -1 {
+			coveredRanges = append(coveredRanges, []int{currentStart, event.id})
 		}
 	}
 
-	fmt.Println(numFreshIngredients)
+	coveredCount := 0
+	for _, coveredRange := range coveredRanges {
+		coveredCount += coveredRange[1] - coveredRange[0] + 1
+	}
+	fmt.Println(coveredCount)
 }
 
 func parseInput(lines []string) ([][]int, []int) {
