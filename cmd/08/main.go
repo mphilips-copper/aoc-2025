@@ -37,7 +37,7 @@ func main() {
 	}
 	// fmt.Println("pointToCircuit:", pointToCircuit)
 
-	connectionsToMake := nShortestConnections(points, 1000)
+	connectionsToMake := nShortestConnections(points, 10000)
 	// fmt.Println("connectionsToMake:", connectionsToMake)
 
 	for _, cxn := range connectionsToMake {
@@ -61,6 +61,21 @@ func main() {
 					pointToCircuit[key] = test1
 				}
 			}
+		}
+
+		// not efficient
+		numCircuitsWithPoints := 0
+		for _, circuit := range circuits {
+			if len(circuit.points) > 0 {
+				numCircuitsWithPoints++
+			}
+		}
+		if numCircuitsWithPoints == 1 {
+			point1 := points[idx1]
+			point2 := points[idx2]
+
+			fmt.Println(point1.x * point2.x)
+			break
 		}
 
 		// fmt.Println("point1:", point1, "\npoint2:", point2)
